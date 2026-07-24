@@ -1,6 +1,6 @@
 # The Responsibility Lens — HJPI Scoring Tool
 **Human Judgment Preservation Index**  
-By Aderayo Adelanwa | Ethentra Limited
+By Aderayo Adelanwa | Ethentra 
 
 ---
 
@@ -91,12 +91,14 @@ pip install streamlit matplotlib numpy
 
 ## About
 
-**Ethentra Limited** builds tools and frameworks for responsible AI adoption in B2B tech.
+**Ethentra ** is a research and intelligence firm developing data-driven, future-facing solutions to help scholars, executive teams, and organisations solve complex challenges through rigorous methodology and modern data science.
 
-- 🌐 store.aderayoadelanwa.com  
-- 📧 contact@aderayoadelanwa.com  
-- 💼 [LinkedIn](https://linkedin.com/in/aderayoadelanwa)
+
+- 🌐 https://ethentra.co
+- 📧 contact@aderayoadelanwa.com 
+- 📧 Contact & Partnerships: lab@ethentra.com
 
 ---
 
 *The Responsibility Lens is part of Ethentra's Human-Centered AI toolkit.*
+© Ethentra. All rights reserved.
