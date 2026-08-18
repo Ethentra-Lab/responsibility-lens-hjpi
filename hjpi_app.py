@@ -1,6 +1,6 @@
 # ============================================================
 # HJPI Scoring Tool V3 — Streamlit Web Interface
-# Human Judgment Preservation Index | The Responsibility Lens
+# Human Judgment Preservation Index | Ethentra Studio
 # By Aderayo Adelanwa | Ethentra Limited
 # ============================================================
 
@@ -12,6 +12,7 @@ import numpy as np
 import csv
 from datetime import datetime
 from io import BytesIO, StringIO
+from scoring_config import THRESHOLDS, VERDICT_LABELS, VERDICT_MESSAGES
 
 st.set_page_config(
     page_title="HJPI Tool | The Responsibility Lens",
@@ -25,49 +26,43 @@ st.markdown("""
 
 .brand-header {
     background: #1A1A1A;
-    color: #FAF7F2;
+    color: #F2E8DE;
     padding: 2rem 2.5rem;
     border-radius: 4px;
     margin-bottom: 2rem;
 }
-.brand-header h1 { color: #FAF7F2; font-size: 1.8rem; margin: 0 0 0.3rem 0; }
-.brand-header p { color: #B85C2C; font-size: 0.9rem; margin: 0; letter-spacing: 0.08em; text-transform: uppercase; }
-.section-label { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #B85C2C; font-weight: 500; margin-bottom: 0.3rem; }
+.brand-header h1 { color: #F2E8DE; font-size: 1.8rem; margin: 0 0 0.3rem 0; }
+.brand-header p { color: #FF4810; font-size: 0.9rem; margin: 0; letter-spacing: 0.08em; text-transform: uppercase; }
+.section-label { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #FF4810; font-weight: 500; margin-bottom: 0.3rem; }
 .verdict-box { padding: 1.5rem 2rem; border-radius: 4px; margin: 1.5rem 0; border-left: 5px solid; }
 .verdict-pass { background: #F0F7F0; border-color: #2D7A2D; color: #1A3D1A; }
 .verdict-conditional { background: #FFF8EC; border-color: #C97D00; color: #3D2800; }
-.verdict-redesign { background: #FFF3EC; border-color: #B85C2C; color: #3D1500; }
+.verdict-redesign { background: #FFF3EC; border-color: #B5622A; color: #3D1500; }
 .verdict-fail { background: #FFF0F0; border-color: #C0392B; color: #3D0000; }
 .score-summary { display: flex; gap: 1.5rem; margin: 1.5rem 0; }
-.score-card { background: #1A1A1A; color: #FAF7F2; padding: 1rem 1.5rem; border-radius: 4px; text-align: center; flex: 1; }
-.score-card .number { font-size: 2rem; color: #B85C2C; }
+.score-card { background: #1A1A1A; color: #F2E8DE; padding: 1rem 1.5rem; border-radius: 4px; text-align: center; flex: 1; }
+.score-card .number { font-size: 2rem; color: #FF4810; }
 .score-card .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; }
 .footer { text-align: center; color: #7A6A5E; font-size: 0.8rem; padding: 2rem 0 1rem 0; border-top: 1px solid #DDD0C4; margin-top: 3rem; }
-.stButton > button { background: #B85C2C !important; color: #FAF7F2 !important; border: none !important; border-radius: 4px !important; font-weight: 500 !important; width: 100%; }
-.stButton > button:hover { background: #9A4820 !important; }
+.stButton > button { background: #FF4810 !important; color: #F2E8DE !important; border: none !important; border-radius: 4px !important; font-weight: 500 !important; width: 100%; }
+.stButton > button:hover { background: #B5622A !important; }
 </style>
 """, unsafe_allow_html=True)
 
 
 def get_verdict(percentage):
-    if percentage >= 85:
-        return "PASS — FLOURISHING-ORIENTED", "PASS"
-    elif percentage >= 70:
-        return "CONDITIONAL PASS", "CONDITIONAL"
-    elif percentage >= 50:
-        return "REDESIGN REQUIRED", "REDESIGN"
+    if percentage >= THRESHOLDS["pass"]:
+        return VERDICT_LABELS["PASS"], "PASS"
+    elif percentage >= THRESHOLDS["conditional"]:
+        return VERDICT_LABELS["CONDITIONAL"], "CONDITIONAL"
+    elif percentage >= THRESHOLDS["redesign"]:
+        return VERDICT_LABELS["REDESIGN"], "REDESIGN"
     else:
-        return "FAIL — REJECT DEPLOYMENT", "FAIL"
+        return VERDICT_LABELS["FAIL"], "FAIL"
 
 
 def get_verdict_message(level):
-    messages = {
-        "PASS": "This system preserves and develops human judgment. Users become better decision-makers over time. Cleared for deployment with standard monitoring.",
-        "CONDITIONAL": "This system broadly preserves human judgment but has gaps. Address flagged dimensions before or after deployment. Schedule a review in 90 days.",
-        "REDESIGN": "Significant human judgment preservation failures found. Do not deploy until red-flagged dimensions are resolved. Return to design team with specific recommendations.",
-        "FAIL": "Serious risk to human judgment and autonomy detected. Reject deployment. Return to design phase. Request an independent Responsibility Lens audit."
-    }
-    return messages[level]
+    return VERDICT_MESSAGES[level]
 
 
 def create_radar_chart(scores, system_name, total, percentage, verdict):
@@ -77,12 +72,12 @@ def create_radar_chart(scores, system_name, total, percentage, verdict):
     scores_plot = scores + [scores[0]]
     angles += angles[:1]
     fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
-    fig.patch.set_facecolor('#FAF7F2')
-    ax.set_facecolor('#FAF7F2')
-    ax.fill(angles, scores_plot, color='#B85C2C', alpha=0.25)
-    ax.plot(angles, scores_plot, color='#B85C2C', linewidth=2.5)
+    fig.patch.set_facecolor('#F2E8DE')
+    ax.set_facecolor('#F2E8DE')
+    ax.fill(angles, scores_plot, color='#FF4810', alpha=0.25)
+    ax.plot(angles, scores_plot, color='#FF4810', linewidth=2.5)
     for angle, score in zip(angles[:-1], scores):
-        ax.plot(angle, score, 'o', color='#B85C2C', markersize=7, zorder=5)
+        ax.plot(angle, score, 'o', color='#FF4810', markersize=7, zorder=5)
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(dimensions, size=10, fontweight='bold', color='#1A1A1A')
     ax.set_ylim(0, 5)
@@ -91,7 +86,7 @@ def create_radar_chart(scores, system_name, total, percentage, verdict):
     ax.grid(color='#DDD0C4', linestyle='--', linewidth=0.6)
     ax.spines['polar'].set_color('#DDD0C4')
     plt.title(f"HJPI — {system_name}\n{total}/25  ({percentage:.1f}%)  |  {verdict}", size=11, fontweight='bold', color='#1A1A1A', pad=20)
-    fig.text(0.5, 0.01, 'The Responsibility Lens  |  Ethentra Limited  |  contact@aderayoadelanwa.com', ha='center', size=8, color='#7A6A5E')
+    fig.text(0.5, 0.01, 'The Responsibility Lens  |  Ethentra Limited  |  hello@ethentra.co', ha='center', size=8, color='#7A6A5E')
     return fig
 
 
@@ -224,7 +219,7 @@ elif st.session_state.step == "results":
     for dim, score in zip(dimensions, scores):
         col1, col2, col3 = st.columns([3, 1, 1])
         col1.markdown(f"<small>{dim}</small>", unsafe_allow_html=True)
-        col2.markdown(f"<small style='color:#B85C2C'>{'█' * score}{'░' * (5 - score)}</small>", unsafe_allow_html=True)
+        col2.markdown(f"<small style='color:#FF4810'>{'█' * score}{'░' * (5 - score)}</small>", unsafe_allow_html=True)
         col3.markdown(f"<small><b>{score}/5</b></small>", unsafe_allow_html=True)
     st.markdown("---")
     st.markdown("**HJPI Radar Chart**")
@@ -236,7 +231,7 @@ elif st.session_state.step == "results":
     csv_data = csv_to_download(meta, scores, total, percentage, verdict)
     col1.download_button(label="⬇ Download CSV", data=csv_data, file_name=f"hjpi_{meta['system_name'].replace(' ', '_')}.csv", mime="text/csv")
     buf = BytesIO()
-    fig.savefig(buf, format="png", dpi=150, bbox_inches='tight', facecolor='#FAF7F2')
+    fig.savefig(buf, format="png", dpi=150, bbox_inches='tight', facecolor='#F2E8DE')
     buf.seek(0)
     col2.download_button(label="⬇ Download Chart", data=buf, file_name=f"hjpi_{meta['system_name'].replace(' ', '_')}.png", mime="image/png")
     st.markdown("---")
@@ -249,17 +244,17 @@ elif st.session_state.step == "results":
 
 st.markdown("""
 <div class="footer">
-    The Responsibility Lens &nbsp;|&nbsp; Ethentra Limited &nbsp;|&nbsp;
-    contact@aderayoadelanwa.com &nbsp;|&nbsp; store.aderayoadelanwa.com
+    Ethentra Studio  ;| ; Ethentra Limited  ;| ;
+    hello@ethentra.co ;| ; https://ethentra.co/
 </div>
 """, unsafe_allow_html=True)
 st.markdown("---")
 
 st.markdown("""
-<div style="background:#FFF8EC; border-left:5px solid #B85C2C; padding:1rem 1.5rem; border-radius:4px; margin-top:1rem;">
+<div style="background:#FFF8EC; border-left:5px solid #FF4810; padding:1rem 1.5rem; border-radius:4px; margin-top:1rem;">
     📋 <b style="color:#1A1A1A;">Want a full Responsible AI Audit for your organisation?</b><br>
-    <a href="mailto:contact@aderayoadelanwa.com" style="color:#B85C2C; font-weight:600;">
-        Book a call → contact@aderayoadelanwa.com
+    <a href="mailto:lab@ethentra.co" style="color:#FF4810; font-weight:600;">
+        Book a call → lab@ethentra.co
     </a>
 </div>
 """, unsafe_allow_html=True)
