@@ -1,8 +1,11 @@
 # ============================================================
-# HJPI Scoring Tool — The Responsibility Lens
+# HJPI Scoring Tool (Terminal Version) — The Responsibility Lens
 # Human Judgment Preservation Index
 # By Aderayo Adelanwa | Ethentra Limited
 # ============================================================
+
+from scoring_config import THRESHOLDS, VERDICT_LABELS, VERDICT_MESSAGES
+
 
 def get_score(question_number, question_text):
     print(f"\nQuestion {question_number} of 5")
@@ -20,14 +23,14 @@ def get_score(question_number, question_text):
 
 
 def get_verdict(percentage):
-    if percentage >= 85:
-        return "PASS — FLOURISHING-ORIENTED", "PASS"
-    elif percentage >= 70:
-        return "CONDITIONAL PASS", "CONDITIONAL"
-    elif percentage >= 50:
-        return "REDESIGN REQUIRED", "REDESIGN"
+    if percentage >= THRESHOLDS["pass"]:
+        return VERDICT_LABELS["PASS"], "PASS"
+    elif percentage >= THRESHOLDS["conditional"]:
+        return VERDICT_LABELS["CONDITIONAL"], "CONDITIONAL"
+    elif percentage >= THRESHOLDS["redesign"]:
+        return VERDICT_LABELS["REDESIGN"], "REDESIGN"
     else:
-        return "FAIL — REJECT DEPLOYMENT", "FAIL"
+        return VERDICT_LABELS["FAIL"], "FAIL"
 
 
 def run_evaluation():
@@ -96,28 +99,12 @@ def run_evaluation():
 
     print("\n  WHAT THIS MEANS")
     print("  " + "-" * 50)
-
-    if level == "PASS":
-        print("  This system preserves and develops human judgment.")
-        print("  Users become better decision-makers over time.")
-        print("  Cleared for deployment with standard monitoring.")
-    elif level == "CONDITIONAL":
-        print("  This system broadly preserves human judgment but has gaps.")
-        print("  Address flagged dimensions before or after deployment.")
-        print("  Schedule a review in 90 days.")
-    elif level == "REDESIGN":
-        print("  Significant human judgment preservation failures found.")
-        print("  Do not deploy until red-flagged dimensions are resolved.")
-        print("  Return to design team with specific recommendations.")
-    else:
-        print("  Serious risk to human judgment and autonomy detected.")
-        print("  Reject deployment. Return to design phase.")
-        print("  Request an independent Responsibility Lens audit.")
+    print(f"  {VERDICT_MESSAGES[level]}")
 
     print("\n" + "=" * 60)
     print("  The Responsibility Lens | Ethentra Limited")
-    print("  contact@aderayoadelanwa.com")
-    print("  store.aderayoadelanwa.com")
+    print("  lab@ethentra.com")
+    print("  ethentra.co")
     print("=" * 60 + "\n")
 
     return {
@@ -206,11 +193,11 @@ def create_radar_chart(result):
     fig, ax = plt.subplots(figsize=(8, 8), 
                            subplot_kw=dict(polar=True))
     
-    # Colours matching Responsibility Lens brand
+    # Colours matching Ethentra brand
     ax.fill(angles, scores_plot, 
-            color='#B85C2C', alpha=0.25)
+            color='#FF4810', alpha=0.25)
     ax.plot(angles, scores_plot, 
-            color='#B85C2C', linewidth=2)
+            color='#FF4810', linewidth=2)
     
     # Add dimension labels
     ax.set_xticks(angles[:-1])
@@ -237,21 +224,21 @@ def create_radar_chart(result):
     # Subtitle
     fig.text(0.5, 0.02, 
              'The Responsibility Lens | Ethentra Limited | '
-             'contact@aderayoadelanwa.com',
+             'lab@ethentra.com',
              ha='center', size=8, color='#7A6A5E')
     
-    # Save and show
+    # Save BEFORE show — once the window is closed, some backends
+    # clear the figure, which can result in a blank or missing PNG
     filename = (f"hjpi_{result['system_name']
                 .replace(' ', '_')}.png"
                 )
-    plt.show()
-
-    plt.savefig(filename, dpi=150, 
+    plt.savefig(filename, dpi=150,
                 bbox_inches='tight',
-                facecolor='#FAF7F2')
-    
-    
+                facecolor='#F2E8DE')
+
     print(f"\n  Chart saved as {filename}")
+
+    plt.show()
 
 result = run_evaluation()
 save_to_csv(result)
