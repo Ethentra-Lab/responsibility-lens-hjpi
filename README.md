@@ -42,10 +42,16 @@ For a complete mixed-methods audit — including qualitative analysis, risk revi
 ## How to Run
 
 ### Web Interface (V3) — Recommended
-```bash
+
+Try it live: https://responsibility-lens-hjpi.streamlit.app/
+
+To run locally (requires a `scoring_config.py` file, not included in this
+public repo — contact lab@ethentra.com for access):
+
+​```bash
 pip install streamlit matplotlib numpy
 streamlit run hjpi_app.py
-```
+​```
 ### Streamlit Version
 ```bash
 https://responsibility-lens-hjpi.streamlit.app/
