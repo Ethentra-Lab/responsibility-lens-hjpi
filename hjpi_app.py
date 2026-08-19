@@ -12,8 +12,6 @@ import numpy as np
 import csv
 from datetime import datetime
 from io import BytesIO, StringIO
-import streamlit as st
-
 THRESHOLDS = {
     "pass": st.secrets["thresholds"]["pass"],
     "conditional": st.secrets["thresholds"]["conditional"],
