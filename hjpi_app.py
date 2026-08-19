@@ -253,8 +253,8 @@ elif st.session_state.step == "results":
 
 st.markdown("""
 <div class="footer">
-    Ethentra Studio  ;| ; Ethentra Limited  ;| ;
-    hello@ethentra.co ;| ; https://ethentra.co/
+    Ethentra Studio  |  Ethentra Limited  
+    hello@ethentra.co |  https://ethentra.co/
 </div>
 """, unsafe_allow_html=True)
 st.markdown("---")
