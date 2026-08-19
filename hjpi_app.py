@@ -12,7 +12,17 @@ import numpy as np
 import csv
 from datetime import datetime
 from io import BytesIO, StringIO
-from scoring_config import THRESHOLDS, VERDICT_LABELS, VERDICT_MESSAGES
+import streamlit as st
+
+THRESHOLDS = {
+    "pass": st.secrets["thresholds"]["pass"],
+    "conditional": st.secrets["thresholds"]["conditional"],
+    "redesign": st.secrets["thresholds"]["redesign"],
+}
+
+VERDICT_LABELS = dict(st.secrets["verdict_labels"])
+
+VERDICT_MESSAGES = dict(st.secrets["verdict_messages"])
 
 st.set_page_config(
     page_title="HJPI Tool | The Responsibility Lens",
