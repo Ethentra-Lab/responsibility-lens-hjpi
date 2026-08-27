@@ -6,11 +6,11 @@ By Aderayo Adelanwa | Ethentra
 
 ## What is the HJPI Tool?
 
-The **Human Judgment Preservation Index (HJPI)** evaluates whether an AI system supports or erodes human judgment over time.
+The **Human Judgment Preservation Index (HJPI)** is a structured screening assessment for examining how an AI-assisted system may affect human judgment, agency, and meaningful oversight.
 
-It scores any AI system across five dimensions and returns a **Flourishing Verdict** — telling you whether the system is safe to deploy, needs redesign, or should be rejected.
+It evaluates a system across five dimensions and identifies potential risks to the preservation of human judgment, highlighting areas that may require deeper review.
 
-Built for AI practitioners, ethics reviewers, and B2B tech teams who need a structured way to assess AI systems before deployment.
+Built for AI practitioners, responsible-AI professionals, ethics reviewers, and organizations seeking a structured way to examine human-judgment risks in AI-assisted systems.
 
 ## Free Tool vs. Full Audit
 

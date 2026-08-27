@@ -10,8 +10,12 @@ import matplotlib
 matplotlib.use('Agg')
 import numpy as np
 import csv
+
 from datetime import datetime
 from io import BytesIO, StringIO
+
+from hjpi.scoring import calculate_score, get_verdict
+
 
 THRESHOLDS = {
     "pass": st.secrets["thresholds"]["pass"],
@@ -57,18 +61,6 @@ st.markdown("""
 .stButton > button:hover { background: #B5622A !important; }
 </style>
 """, unsafe_allow_html=True)
-
-
-def get_verdict(percentage):
-    if percentage >= THRESHOLDS["pass"]:
-        return VERDICT_LABELS["PASS"], "PASS"
-    elif percentage >= THRESHOLDS["conditional"]:
-        return VERDICT_LABELS["CONDITIONAL"], "CONDITIONAL"
-    elif percentage >= THRESHOLDS["redesign"]:
-        return VERDICT_LABELS["REDESIGN"], "REDESIGN"
-    else:
-        return VERDICT_LABELS["FAIL"], "FAIL"
-
 
 def get_verdict_message(level):
     return VERDICT_MESSAGES[level]
@@ -128,14 +120,16 @@ st.markdown("""
 
 if st.session_state.step == "intro":
     st.markdown("### What is the HJPI Tool?")
-    st.markdown("""
-    The **Human Judgment Preservation Index (HJPI)** evaluates whether an AI system
-    supports or erodes human judgment over time.
 
-    It scores any AI system across **five dimensions** and returns a
-    **Flourishing Verdict** — telling you whether the system is safe to deploy,
-    needs redesign, or should be rejected.
-    """)
+    st.markdown("""
+The **Human Judgment Preservation Index (HJPI)** is a structured screening
+assessment for examining how an AI-assisted system may affect human judgment,
+agency, and meaningful oversight.
+
+It evaluates the system across **five dimensions** and identifies potential
+risks to the preservation of human judgment, highlighting areas that may
+require deeper review.
+""")
     st.markdown("---")
     st.markdown('<div class="section-label">The Five Dimensions</div>', unsafe_allow_html=True)
     for icon, title, desc in [
@@ -202,20 +196,55 @@ elif st.session_state.step == "scoring":
 elif st.session_state.step == "results":
     scores = st.session_state.scores
     meta = st.session_state.meta
-    total = sum(scores)
-    percentage = (total / 25) * 100
-    verdict, level = get_verdict(percentage)
-    dimensions = ["Reasoning Transparency", "User Override Capability", "Skill Development", "No Decision Outsourcing", "Transparency at Use"]
-    verdict_class = {"PASS": "verdict-pass", "CONDITIONAL": "verdict-conditional", "REDESIGN": "verdict-redesign", "FAIL": "verdict-fail"}[level]
+
+    total, percentage = calculate_score(scores)
+
+    verdict, level = get_verdict(
+        percentage,
+        THRESHOLDS,
+        VERDICT_LABELS,
+    )
+
+    dimensions = [
+        "Reasoning Transparency",
+        "User Override Capability",
+        "Skill Development",
+        "No Decision Outsourcing",
+        "Transparency at Use",
+    ]
+
+    verdict_class = {
+        "PASS": "verdict-pass",
+        "CONDITIONAL": "verdict-conditional",
+        "REDESIGN": "verdict-redesign",
+        "FAIL": "verdict-fail",
+    }[level]
 
     st.markdown("### Evaluation Results")
-    st.markdown(f'<div class="section-label">{meta["system_name"]} · {meta["organisation"]}</div>', unsafe_allow_html=True)
-    st.markdown(f"""
-    <div class="score-summary">
-        <div class="score-card"><div class="number">{total}/25</div><div class="label">Total Score</div></div>
-        <div class="score-card"><div class="number">{percentage:.1f}%</div><div class="label">HJPI Score</div></div>
-    </div>
-    """, unsafe_allow_html=True)
+
+    st.markdown(
+        f'<div class="section-label">'
+        f'{meta["system_name"]} · {meta["organisation"]}'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        f"""
+        <div class="score-summary">
+            <div class="score-card">
+                <div class="number">{total}/25</div>
+                <div class="label">Total Score</div>
+            </div>
+
+            <div class="score-card">
+                <div class="number">{percentage:.1f}%</div>
+                <div class="label">HJPI Score</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.markdown(f"""
     <div class="verdict-box {verdict_class}">
         <strong>FLOURISHING VERDICT</strong><br>
