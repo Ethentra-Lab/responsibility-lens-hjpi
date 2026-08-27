@@ -13,9 +13,13 @@ import csv
 
 from datetime import datetime
 from io import BytesIO, StringIO
-
 from hjpi.scoring import calculate_score, get_verdict
 
+from hjpi.config import (
+    DIMENSIONS,
+    MAX_DIMENSION_SCORE,
+    get_maximum_total_score,
+)
 
 THRESHOLDS = {
     "pass": st.secrets["thresholds"]["pass"],
@@ -67,27 +71,108 @@ def get_verdict_message(level):
 
 
 def create_radar_chart(scores, system_name, total, percentage, verdict):
-    dimensions = ['Reasoning\nTransparency', 'User Override\nCapability', 'Skill\nDevelopment', 'No Decision\nOutsourcing', 'Transparency\nat Use']
-    num_dims = len(dimensions)
-    angles = np.linspace(0, 2 * np.pi, num_dims, endpoint=False).tolist()
+    radar_labels = [
+        dimension.replace(" ", "\n", 1)
+        for dimension in DIMENSIONS
+    ]
+
+    num_dims = len(DIMENSIONS)
+
+    angles = np.linspace(
+        0,
+        2 * np.pi,
+        num_dims,
+        endpoint=False,
+    ).tolist()
+
     scores_plot = scores + [scores[0]]
     angles += angles[:1]
-    fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
-    fig.patch.set_facecolor('#F2E8DE')
-    ax.set_facecolor('#F2E8DE')
-    ax.fill(angles, scores_plot, color='#FF4810', alpha=0.25)
-    ax.plot(angles, scores_plot, color='#FF4810', linewidth=2.5)
+
+    fig, ax = plt.subplots(
+        figsize=(7, 7),
+        subplot_kw=dict(polar=True),
+    )
+
+    fig.patch.set_facecolor("#F2E8DE")
+    ax.set_facecolor("#F2E8DE")
+
+    ax.fill(
+        angles,
+        scores_plot,
+        color="#FF4810",
+        alpha=0.25,
+    )
+
+    ax.plot(
+        angles,
+        scores_plot,
+        color="#FF4810",
+        linewidth=2.5,
+    )
+
     for angle, score in zip(angles[:-1], scores):
-        ax.plot(angle, score, 'o', color='#FF4810', markersize=7, zorder=5)
+        ax.plot(
+            angle,
+            score,
+            "o",
+            color="#FF4810",
+            markersize=7,
+            zorder=5,
+        )
+
     ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(dimensions, size=10, fontweight='bold', color='#1A1A1A')
-    ax.set_ylim(0, 5)
-    ax.set_yticks([1, 2, 3, 4, 5])
-    ax.set_yticklabels(['1', '2', '3', '4', '5'], size=8, color='#7A6A5E')
-    ax.grid(color='#DDD0C4', linestyle='--', linewidth=0.6)
-    ax.spines['polar'].set_color('#DDD0C4')
-    plt.title(f"HJPI — {system_name}\n{total}/25  ({percentage:.1f}%)  |  {verdict}", size=11, fontweight='bold', color='#1A1A1A', pad=20)
-    fig.text(0.5, 0.01, 'The Responsibility Lens  |  Ethentra Limited  |  hello@ethentra.co', ha='center', size=8, color='#7A6A5E')
+    ax.set_xticklabels(
+        radar_labels,
+        size=10,
+        fontweight="bold",
+        color="#1A1A1A",
+    )
+
+    ax.set_ylim(0, MAX_DIMENSION_SCORE)
+
+    ax.set_yticks(
+        range(1, MAX_DIMENSION_SCORE + 1)
+    )
+
+    ax.set_yticklabels(
+        [
+            str(score)
+            for score in range(1, MAX_DIMENSION_SCORE + 1)
+        ],
+        size=8,
+        color="#7A6A5E",
+    )
+
+    ax.grid(
+        color="#DDD0C4",
+        linestyle="--",
+        linewidth=0.6,
+    )
+
+    ax.spines["polar"].set_color("#DDD0C4")
+
+    maximum_score = get_maximum_total_score()
+
+    plt.title(
+        f"HJPI — {system_name}\n"
+        f"{total}/{maximum_score}  "
+        f"({percentage:.1f}%)  |  {verdict}",
+        size=11,
+        fontweight="bold",
+        color="#1A1A1A",
+        pad=20,
+    )
+
+    fig.text(
+        0.5,
+        0.01,
+        "The Responsibility Lens | "
+        "Ethentra Limited | hello@ethentra.co",
+        ha="center",
+        size=8,
+        color="#7A6A5E",
+    )
+
     return fig
 
 
@@ -162,36 +247,85 @@ elif st.session_state.step == "details":
                 st.session_state.meta = {"system_name": system_name, "evaluator": evaluator, "organisation": organisation, "context": context}
                 st.session_state.step = "scoring"
                 st.rerun()
-
-
 elif st.session_state.step == "scoring":
     st.markdown("### Step 2 of 2 — Dimension Scoring")
-    st.markdown(f'<div class="section-label">Evaluating: {st.session_state.meta["system_name"]}</div>', unsafe_allow_html=True)
-    st.markdown("Rate each dimension from **1 (Very Poor)** to **5 (Excellent)**.")
+
+    st.markdown(
+        f'<div class="section-label">'
+        f'Evaluating: {st.session_state.meta["system_name"]}'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        "Rate each dimension from **1 (Very Poor)** to **5 (Excellent)**."
+    )
+
     st.markdown("---")
+
     questions = [
-        ("🔍 Reasoning Transparency", "Does the AI system present its reasoning so users can evaluate the logic themselves?"),
-        ("🎛️ User Override Capability", "Do users retain the ability to override the system — and do they actually use it?"),
-        ("📈 Skill Development", "Is there evidence that regular use builds user skills rather than causing dependency?"),
-        ("🧠 No Decision Outsourcing", "Are users genuinely reviewing outputs rather than simply approving them?"),
-        ("💡 Transparency at Use", "Is the system behaviour transparent at point of use — users understand what it does?"),
+        (
+            "🔍 Reasoning Transparency",
+            "Does the AI system present its reasoning so users can evaluate "
+            "the logic themselves?",
+        ),
+        (
+            "🎛️ User Override Capability",
+            "Do users retain the ability to override the system — "
+            "and do they actually use it?",
+        ),
+        (
+            "📈 Skill Development",
+            "Is there evidence that regular use builds user skills "
+            "rather than causing dependency?",
+        ),
+        (
+            "🧠 No Decision Outsourcing",
+            "Are users genuinely reviewing outputs rather than "
+            "simply approving them?",
+        ),
+        (
+            "💡 Transparency at Use",
+            "Is the system behaviour transparent at point of use — "
+            "users understand what it does?",
+        ),
     ]
-    score_options = {"1 — Very Poor": 1, "2 — Poor": 2, "3 — Moderate": 3, "4 — Good": 4, "5 — Excellent": 5}
+
+    score_options = {
+        "1 — Very Poor": 1,
+        "2 — Poor": 2,
+        "3 — Moderate": 3,
+        "4 — Good": 4,
+        "5 — Excellent": 5,
+    }
+
     with st.form("scoring_form"):
         scores = []
+
         for i, (dim, question) in enumerate(questions):
-            st.markdown(f"**Q{i+1}. {dim}**")
+            st.markdown(f"**Q{i + 1}. {dim}**")
             st.caption(question)
-            choice = st.radio(f"score_{i}", options=list(score_options.keys()), index=2, horizontal=True, label_visibility="collapsed", key=f"q{i}")
+
+            choice = st.radio(
+                f"score_{i}",
+                options=list(score_options.keys()),
+                index=2,
+                horizontal=True,
+                label_visibility="collapsed",
+                key=f"q{i}",
+            )
+
             scores.append(score_options[choice])
+
             if i < len(questions) - 1:
                 st.markdown("---")
+
         submitted = st.form_submit_button("Generate Results →")
+
         if submitted:
             st.session_state.scores = scores
             st.session_state.step = "results"
             st.rerun()
-
 
 elif st.session_state.step == "results":
     scores = st.session_state.scores
@@ -205,13 +339,7 @@ elif st.session_state.step == "results":
         VERDICT_LABELS,
     )
 
-    dimensions = [
-        "Reasoning Transparency",
-        "User Override Capability",
-        "Skill Development",
-        "No Decision Outsourcing",
-        "Transparency at Use",
-    ]
+    maximum_score = get_maximum_total_score()
 
     verdict_class = {
         "PASS": "verdict-pass",
@@ -223,26 +351,22 @@ elif st.session_state.step == "results":
     st.markdown("### Evaluation Results")
 
     st.markdown(
-        f'<div class="section-label">'
-        f'{meta["system_name"]} · {meta["organisation"]}'
-        f'</div>',
+        f'<div class="section-label">{meta["system_name"]} · {meta["organisation"]}</div>',
         unsafe_allow_html=True,
     )
-
     st.markdown(
         f"""
-        <div class="score-summary">
-            <div class="score-card">
-                <div class="number">{total}/25</div>
-                <div class="label">Total Score</div>
-            </div>
-
-            <div class="score-card">
-                <div class="number">{percentage:.1f}%</div>
-                <div class="label">HJPI Score</div>
-            </div>
-        </div>
-        """,
+<div class="score-summary">
+    <div class="score-card">
+        <div class="number">{total}/{maximum_score}</div>
+        <div class="label">Total Score</div>
+    </div>
+    <div class="score-card">
+        <div class="number">{percentage:.1f}%</div>
+        <div class="label">HJPI Score</div>
+    </div>
+</div>
+""",
         unsafe_allow_html=True,
     )
     st.markdown(f"""
@@ -254,11 +378,20 @@ elif st.session_state.step == "results":
     """, unsafe_allow_html=True)
     st.markdown("---")
     st.markdown("**Dimension Breakdown**")
-    for dim, score in zip(dimensions, scores):
+    for dim, score in zip(DIMENSIONS, scores):
         col1, col2, col3 = st.columns([3, 1, 1])
         col1.markdown(f"<small>{dim}</small>", unsafe_allow_html=True)
-        col2.markdown(f"<small style='color:#FF4810'>{'█' * score}{'░' * (5 - score)}</small>", unsafe_allow_html=True)
-        col3.markdown(f"<small><b>{score}/5</b></small>", unsafe_allow_html=True)
+        col2.markdown(
+            f"<small style='color:#FF4810'>"
+            f"{'█' * score}"
+            f"{'░' * (MAX_DIMENSION_SCORE - score)}"
+            f"</small>",
+              unsafe_allow_html=True,
+              )
+        col3.markdown(
+            f"<small><b>{score}/{MAX_DIMENSION_SCORE}</b></small>",
+              unsafe_allow_html=True,
+              )
     st.markdown("---")
     st.markdown("**HJPI Radar Chart**")
     fig = create_radar_chart(scores, meta["system_name"], total, percentage, verdict)

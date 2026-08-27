@@ -1,8 +1,6 @@
 from collections.abc import Mapping, Sequence
 
-
-MIN_DIMENSION_SCORE = 1
-MAX_DIMENSION_SCORE = 5
+from hjpi.config import MIN_DIMENSION_SCORE, MAX_DIMENSION_SCORE
 
 
 def calculate_score(scores: Sequence[int]) -> tuple[int, float]:
