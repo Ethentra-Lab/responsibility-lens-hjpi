@@ -1,1 +1,9 @@
 scoring_config.py
+# Environment variables and secrets
+.env
+*.env
+.streamlit/secrets.toml
+
+# Python generated files
+__pycache__/
+*.pyc
