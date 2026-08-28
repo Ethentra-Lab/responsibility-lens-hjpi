@@ -83,3 +83,142 @@ def test_get_verdict_returns_fail():
 
     assert verdict == "Fail"
     assert level == "FAIL"
+
+def test_get_verdict_at_pass_boundary():
+    thresholds = {
+        "pass": 80,
+        "conditional": 60,
+        "redesign": 40,
+    }
+
+    labels = {
+        "PASS": "Pass",
+        "CONDITIONAL": "Conditional",
+        "REDESIGN": "Redesign",
+        "FAIL": "Fail",
+    }
+
+    verdict, level = get_verdict(
+        80,
+        thresholds,
+        labels,
+    )
+
+    assert verdict == "Pass"
+    assert level == "PASS"
+
+
+def test_get_verdict_at_conditional_boundary():
+    thresholds = {
+        "pass": 80,
+        "conditional": 60,
+        "redesign": 40,
+    }
+
+    labels = {
+        "PASS": "Pass",
+        "CONDITIONAL": "Conditional",
+        "REDESIGN": "Redesign",
+        "FAIL": "Fail",
+    }
+
+    verdict, level = get_verdict(
+        60,
+        thresholds,
+        labels,
+    )
+
+    assert verdict == "Conditional"
+    assert level == "CONDITIONAL"
+
+
+def test_get_verdict_at_redesign_boundary():
+    thresholds = {
+        "pass": 80,
+        "conditional": 60,
+        "redesign": 40,
+    }
+
+    labels = {
+        "PASS": "Pass",
+        "CONDITIONAL": "Conditional",
+        "REDESIGN": "Redesign",
+        "FAIL": "Fail",
+    }
+
+    verdict, level = get_verdict(
+        40,
+        thresholds,
+        labels,
+    )
+
+    assert verdict == "Redesign"
+    assert level == "REDESIGN"
+
+
+def test_get_verdict_below_redesign_is_fail():
+    thresholds = {
+        "pass": 80,
+        "conditional": 60,
+        "redesign": 40,
+    }
+
+    labels = {
+        "PASS": "Pass",
+        "CONDITIONAL": "Conditional",
+        "REDESIGN": "Redesign",
+        "FAIL": "Fail",
+    }
+
+    verdict, level = get_verdict(
+        39.9,
+        thresholds,
+        labels,
+    )
+
+    assert verdict == "Fail"
+    assert level == "FAIL"
+
+
+def test_get_verdict_rejects_percentage_above_100():
+    thresholds = {
+        "pass": 80,
+        "conditional": 60,
+        "redesign": 40,
+    }
+
+    labels = {
+        "PASS": "Pass",
+        "CONDITIONAL": "Conditional",
+        "REDESIGN": "Redesign",
+        "FAIL": "Fail",
+    }
+
+    with pytest.raises(ValueError):
+        get_verdict(
+            101,
+            thresholds,
+            labels,
+        )
+
+
+def test_get_verdict_rejects_negative_percentage():
+    thresholds = {
+        "pass": 80,
+        "conditional": 60,
+        "redesign": 40,
+    }
+
+    labels = {
+        "PASS": "Pass",
+        "CONDITIONAL": "Conditional",
+        "REDESIGN": "Redesign",
+        "FAIL": "Fail",
+    }
+
+    with pytest.raises(ValueError):
+        get_verdict(
+            -1,
+            thresholds,
+            labels,
+        )

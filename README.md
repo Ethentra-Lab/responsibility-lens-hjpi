@@ -64,7 +64,7 @@ Learn more at https://ethentra.co
 - V1 — Terminal scoring tool ✅
 - V2 — Radar chart visualisation ✅
 - V3 — Streamlit web interface ✅
-- V4 — Modular application architecture 🚧
+- V4 — Modular application architecture ✅
 
 ## Live Application
 
