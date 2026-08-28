@@ -76,42 +76,47 @@ Install the required packages:
 
 ```bash
 pip install streamlit matplotlib numpy
+```
 
 Configure local Streamlit secrets in:
 
-Project Architecture
+```text
+.streamlit/secrets.toml
+```
 
-The V4 refactor separates methodology, configuration, scoring logic,
-presentation, visualisation, and exports to support continued development
-of The Responsibility Lens into a fuller assessment platform.
+Then run:
 
-About ETHENTRA
+```bash
+streamlit run hjpi_app.py
+```
+
+## Project Architecture
+
+The V4 refactor separates methodology, configuration, scoring logic, presentation, visualisation, and exports to support the continued development of The Responsibility Lens into a fuller assessment platform.
+
+## About ETHENTRA
+
 ETHENTRA is a research-driven technology and advisory company working at the intersection of research, artificial intelligence, digital transformation, human judgment, and responsible technology.
 
-The Responsibility Lens is an ETHENTRA initiative focused on examining
-how AI-assisted systems affect human judgment, agency, and meaningful
-human oversight. It is a human-centred AI assessment and decision-support platform for evaluating how AI systems and digital transformation initiatives affect human judgment, agency, oversight, and responsibility.
+The Responsibility Lens is an ETHENTRA initiative focused on examining how AI-assisted systems affect human judgment, agency, meaningful oversight, and responsibility.
 
+It is being developed as a human-centred AI assessment and decision-support platform for evaluating how AI systems and digital transformation initiatives affect human judgment, agency, oversight, and responsibility.
 
-Usage
+## Usage
 
 The public screening version of this tool is available for self-assessment, research, and educational use.
 
 Additional professional and paid versions of The Responsibility Lens may include deeper assessment workflows, organisational features, evidence review, and advanced reporting.
 
-
-The HJPI methodology, scoring configuration, and assessment framework are
-proprietary to ETHENTRA and may not be reproduced or used commercially
-without permission.
+The HJPI methodology, scoring configuration, and assessment framework are proprietary to ETHENTRA and may not be reproduced or used commercially without permission.
 
 For commercial, organisational, research, or partnership enquiries:
 
-lab@ethentra.com
- 
-https://ethentra.co
+**Email:** [lab@ethentra.co](mailto:lab@ethentra.co)
+**Website:** https://ethentra.co
 
-The Human Judgment Preservation Index (HJPI) is part of
-The Responsibility Lens by ETHENTRA.
+---
 
-© ETHENTRA. All rights reserved
+The Human Judgment Preservation Index (HJPI) is part of **The Responsibility Lens by ETHENTRA**.
 
+© ETHENTRA. All rights reserved.
