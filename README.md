@@ -1,109 +1,117 @@
-# The Responsibility Lens — HJPI Scoring Tool
-**Human Judgment Preservation Index**  
-By Aderayo Adelanwa | Ethentra 
+# The Responsibility Lens — HJPI Screening Tool
 
----
+**Human Judgment Preservation Index (HJPI)**  
+By Aderayo Adelanwa | ETHENTRA
 
-## What is the HJPI Tool?
+## Overview
 
-The **Human Judgment Preservation Index (HJPI)** is a structured screening assessment for examining how an AI-assisted system may affect human judgment, agency, and meaningful oversight.
+The Human Judgment Preservation Index (HJPI) is a structured screening
+assessment for examining how an AI-assisted system may affect human judgment,
+agency, and meaningful oversight.
 
-It evaluates a system across five dimensions and identifies potential risks to the preservation of human judgment, highlighting areas that may require deeper review.
+It evaluates an AI-assisted system across six dimensions and identifies
+potential risks to the preservation of human judgment, highlighting areas
+that may require deeper review.
 
-Built for AI practitioners, responsible-AI professionals, ethics reviewers, and organizations seeking a structured way to examine human-judgment risks in AI-assisted systems.
+The tool is designed for AI practitioners, responsible-AI professionals,
+researchers, ethics reviewers, and organisations examining human-judgment
+risks in AI-assisted systems.
 
-## Free Tool vs. Full Audit
+## The Six Dimensions
 
-The Responsibility Lens (this tool) provides a self-assessment score for individual use.
+1. **Reasoning Transparency**  
+   Can users critically understand and evaluate the AI output?
 
-For a complete mixed-methods audit — including qualitative analysis, risk review, and strategic recommendations for your organization — see the **HJPI Full Audit** at [ethentra.co](https://ethentra.co).
+2. **User Override Capability**  
+   Can users meaningfully disagree with, modify, or reject the AI output?
 
-## The Five Dimensions
+3. **Skill Development**  
+   Are users retaining the capabilities required to exercise independent
+   judgment?
 
-| # | Dimension | Question |
-|---|-----------|----------|
-| 1 | Reasoning Transparency | Does the AI show its reasoning so users can evaluate the logic? |
-| 2 | User Override Capability | Can users override the system — and do they actually use it? |
-| 3 | Skill Development | Does regular use build user skills rather than dependency? |
-| 4 | No Decision Outsourcing | Are users genuinely reviewing outputs, not just approving them? |
-| 5 | Transparency at Use | Do users understand what the system does at point of use? |
+4. **No Decision Outsourcing**  
+   Are users still genuinely making the judgment rather than simply
+   accepting the AI recommendation?
 
+5. **Transparency at Use**  
+   Do users understand AI's involvement, role, and limitations?
 
+6. **Judgment Shaping & Choice Architecture**  
+   Is the AI shaping what users notice, consider, or regard as plausible
+   before they make a judgment?
 
+## Screening Tool vs. Professional Review
+
+This public version provides a structured HJPI screening assessment.
+
+A deeper Human Judgment Risk Review can examine additional indicators,
+evidence, confidence levels, organisational context, and reviewer findings.
+
+Learn more at https://ethentra.co
+
+## Current Features
+
+- Interactive assessment across six HJPI dimensions
+- Structured HJPI scoring
+- Screening verdict
+- Dimension-level results
+- Radar chart visualisation
+- Downloadable CSV results
+- Downloadable PNG chart
 
 ## Versions
 
-* V1 — Scoring tool with CSV saving ✅
-* V2 — Radar chart visualisation ✅
-* V3 — Streamlit web interface ✅
+- V1 — Terminal scoring tool ✅
+- V2 — Radar chart visualisation ✅
+- V3 — Streamlit web interface ✅
+- V4 — Modular application architecture 🚧
 
----
+## Live Application
 
-## How to Run
-
-### Web Interface (V3) — Recommended
-
-Try it live: https://responsibility-lens-hjpi.streamlit.app/
-
-To run locally (requires a `scoring_config.py` file, not included in this
-public repo — contact lab@ethentra.com for access):
-
-​```bash
-pip install streamlit matplotlib numpy
-streamlit run hjpi_app.py
-​```
-### Streamlit Version
-```bash
 https://responsibility-lens-hjpi.streamlit.app/
-```
 
-### Terminal Version (V1/V2)
-```bash
-python hjpi_tool.py
-```
+## Run Locally
 
+Install the required packages:
 
-## Output
-
-* Interactive scoring across five dimensions
-* Flourishing Verdict — Pass, Conditional, Redesign, or Fail
-* Radar chart visualisation
-* Downloadable CSV result
-* Downloadable PNG chart
-
-
-## Requirements
-
-```
-streamlit
-matplotlib
-numpy
-```
-
-Install all at once:
 ```bash
 pip install streamlit matplotlib numpy
-```
 
-## About
+Configure local Streamlit secrets in:
 
+Project Architecture
 
-**Ethentra** is a research-driven technology strategy and design firm operating at the intersection of ethics, design, and technology. We help founders, organizations, institutions, and technology teams make better decisions about consequential digital and AI systems. Our work combines research, strategic thinking, UX and interaction design, AI ethics, product strategy, and technical understanding to examine what should be built, how it should work, and what risks or unintended consequences need to be addressed.
+The V4 refactor separates methodology, configuration, scoring logic,
+presentation, visualisation, and exports to support continued development
+of The Responsibility Lens into a fuller assessment platform.
 
-Our flagship offering, the **HJPI Full Audit**, applies this approach directly to AI products and features — see [ethentra.co](https://ethentra.co) for details.
+About ETHENTRA
+ETHENTRA is a research-driven technology and advisory company working at the intersection of research, artificial intelligence, digital transformation, human judgment, and responsible technology.
 
-## Usage
-
-This tool is free to use for self-assessment and educational purposes.
-
-The HJPI methodology, scoring weights, and verdict thresholds are proprietary to Ethentra and may not be reproduced, redistributed, or used commercially without permission.
-
-For commercial, enterprise, or partnership use, contact lab@ethentra.com.
-
-- 🌐 https://ethentra.co
-- 📧 Contact & Partnerships: lab@ethentra.com
+The Responsibility Lens is an ETHENTRA initiative focused on examining
+how AI-assisted systems affect human judgment, agency, and meaningful
+human oversight. It is a human-centred AI assessment and decision-support platform for evaluating how AI systems and digital transformation initiatives affect human judgment, agency, oversight, and responsibility.
 
 
+Usage
 
-*The **Human Judgment Preservation Index (HJPI)** is part of Ethentra's Human-Centered AI toolkit.*
-© Ethentra. All rights reserved.
+The public screening version of this tool is available for self-assessment, research, and educational use.
+
+Additional professional and paid versions of The Responsibility Lens may include deeper assessment workflows, organisational features, evidence review, and advanced reporting.
+
+
+The HJPI methodology, scoring configuration, and assessment framework are
+proprietary to ETHENTRA and may not be reproduced or used commercially
+without permission.
+
+For commercial, organisational, research, or partnership enquiries:
+
+lab@ethentra.com
+ 
+https://ethentra.co
+
+The Human Judgment Preservation Index (HJPI) is part of
+The Responsibility Lens by ETHENTRA.
+
+© ETHENTRA. All rights reserved
+

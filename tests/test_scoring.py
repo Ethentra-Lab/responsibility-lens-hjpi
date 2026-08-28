@@ -2,15 +2,17 @@ import pytest
 
 from hjpi.scoring import calculate_score, get_verdict
 
+from hjpi.config import MAX_DIMENSION_SCORE
+from hjpi.methodology import DIMENSIONS
 
-def test_calculate_score_with_maximum_scores():
-    scores = [5, 5, 5, 5, 5]
+
+def test_calculate_score_maximum():
+    scores = [MAX_DIMENSION_SCORE] * len(DIMENSIONS)
 
     total, percentage = calculate_score(scores)
 
-    assert total == 25
-    assert percentage == 100.0
-
+    assert total == len(DIMENSIONS) * MAX_DIMENSION_SCORE
+    assert percentage == 100
 
 def test_calculate_score_with_mixed_scores():
     scores = [5, 4, 3, 2, 1]

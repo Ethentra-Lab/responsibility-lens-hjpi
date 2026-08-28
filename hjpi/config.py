@@ -1,10 +1,5 @@
-DIMENSIONS = [
-    "Reasoning Transparency",
-    "User Override Capability",
-    "Skill Development",
-    "No Decision Outsourcing",
-    "Transparency at Use",
-]
+
+from hjpi.methodology import DIMENSIONS
 
 MIN_DIMENSION_SCORE = 1
 MAX_DIMENSION_SCORE = 5

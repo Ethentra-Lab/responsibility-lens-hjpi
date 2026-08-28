@@ -1,25 +1,24 @@
 # ============================================================
-# HJPI Scoring Tool V3 — Streamlit Web Interface
-# Human Judgment Preservation Index | Ethentra Studio
-# By Aderayo Adelanwa | Ethentra Limited
+# The Responsibility Lens | Human Judgment Preservation Index
+# By Aderayo Adelanwa | ETHENTRA
 # ============================================================
 
+
 import streamlit as st
-import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('Agg')
-import numpy as np
-import csv
 
-from datetime import datetime
-from io import BytesIO, StringIO
-from hjpi.scoring import calculate_score, get_verdict
-
+from hjpi.charts import create_radar_chart
 from hjpi.config import (
-    DIMENSIONS,
     MAX_DIMENSION_SCORE,
     get_maximum_total_score,
 )
+from hjpi.exports import create_csv_export, create_png_export
+from hjpi.methodology import HJPI_DIMENSIONS, DIMENSIONS
+from hjpi.scoring import calculate_score, get_verdict
+
+
+# ============================================================
+# PRIVATE SCORING CONFIGURATION
+# ============================================================
 
 THRESHOLDS = {
     "pass": st.secrets["thresholds"]["pass"],
@@ -28,16 +27,26 @@ THRESHOLDS = {
 }
 
 VERDICT_LABELS = dict(st.secrets["verdict_labels"])
-
 VERDICT_MESSAGES = dict(st.secrets["verdict_messages"])
+
+
+# ============================================================
+# PAGE CONFIGURATION
+# ============================================================
 
 st.set_page_config(
     page_title="HJPI Tool | The Responsibility Lens",
     page_icon="🔍",
-    layout="centered"
+    layout="centered",
 )
 
-st.markdown("""
+
+# ============================================================
+# BRAND STYLING
+# ============================================================
+
+st.markdown(
+    """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -48,205 +57,245 @@ st.markdown("""
     border-radius: 4px;
     margin-bottom: 2rem;
 }
-.brand-header h1 { color: #F2E8DE; font-size: 1.8rem; margin: 0 0 0.3rem 0; }
-.brand-header p { color: #FF4810; font-size: 0.9rem; margin: 0; letter-spacing: 0.08em; text-transform: uppercase; }
-.section-label { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #FF4810; font-weight: 500; margin-bottom: 0.3rem; }
-.verdict-box { padding: 1.5rem 2rem; border-radius: 4px; margin: 1.5rem 0; border-left: 5px solid; }
-.verdict-pass { background: #F0F7F0; border-color: #2D7A2D; color: #1A3D1A; }
-.verdict-conditional { background: #FFF8EC; border-color: #C97D00; color: #3D2800; }
-.verdict-redesign { background: #FFF3EC; border-color: #B5622A; color: #3D1500; }
-.verdict-fail { background: #FFF0F0; border-color: #C0392B; color: #3D0000; }
-.score-summary { display: flex; gap: 1.5rem; margin: 1.5rem 0; }
-.score-card { background: #1A1A1A; color: #F2E8DE; padding: 1rem 1.5rem; border-radius: 4px; text-align: center; flex: 1; }
-.score-card .number { font-size: 2rem; color: #FF4810; }
-.score-card .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; }
-.footer { text-align: center; color: #7A6A5E; font-size: 0.8rem; padding: 2rem 0 1rem 0; border-top: 1px solid #DDD0C4; margin-top: 3rem; }
-.stButton > button { background: #FF4810 !important; color: #F2E8DE !important; border: none !important; border-radius: 4px !important; font-weight: 500 !important; width: 100%; }
-.stButton > button:hover { background: #B5622A !important; }
+
+.brand-header h1 {
+    color: #F2E8DE;
+    font-size: 1.8rem;
+    margin: 0 0 0.3rem 0;
+}
+
+.brand-header p {
+    color: #FF4810;
+    font-size: 0.9rem;
+    margin: 0;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.section-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #FF4810;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+}
+
+.verdict-box {
+    padding: 1.5rem 2rem;
+    border-radius: 4px;
+    margin: 1.5rem 0;
+    border-left: 5px solid;
+}
+
+.verdict-pass {
+    background: #F0F7F0;
+    border-color: #2D7A2D;
+    color: #1A3D1A;
+}
+
+.verdict-conditional {
+    background: #FFF8EC;
+    border-color: #C97D00;
+    color: #3D2800;
+}
+
+.verdict-redesign {
+    background: #FFF3EC;
+    border-color: #B5622A;
+    color: #3D1500;
+}
+
+.verdict-fail {
+    background: #FFF0F0;
+    border-color: #C0392B;
+    color: #3D0000;
+}
+
+.score-summary {
+    display: flex;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.score-card {
+    background: #1A1A1A;
+    color: #F2E8DE;
+    padding: 1rem 1.5rem;
+    border-radius: 4px;
+    text-align: center;
+    flex: 1;
+}
+
+.score-card .number {
+    font-size: 2rem;
+    color: #FF4810;
+}
+
+.score-card .label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+}
+
+.footer {
+    text-align: center;
+    color: #7A6A5E;
+    font-size: 0.8rem;
+    padding: 2rem 0 1rem 0;
+    border-top: 1px solid #DDD0C4;
+    margin-top: 3rem;
+}
+
+.stButton > button {
+    background: #FF4810 !important;
+    color: #F2E8DE !important;
+    border: none !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+    width: 100%;
+}
+
+.stButton > button:hover {
+    background: #B5622A !important;
+}
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
+
+
+# ============================================================
+# HELPER FUNCTIONS
+# ============================================================
 
 def get_verdict_message(level):
     return VERDICT_MESSAGES[level]
 
 
-def create_radar_chart(scores, system_name, total, percentage, verdict):
-    radar_labels = [
-        dimension.replace(" ", "\n", 1)
-        for dimension in DIMENSIONS
-    ]
-
-    num_dims = len(DIMENSIONS)
-
-    angles = np.linspace(
-        0,
-        2 * np.pi,
-        num_dims,
-        endpoint=False,
-    ).tolist()
-
-    scores_plot = scores + [scores[0]]
-    angles += angles[:1]
-
-    fig, ax = plt.subplots(
-        figsize=(7, 7),
-        subplot_kw=dict(polar=True),
-    )
-
-    fig.patch.set_facecolor("#F2E8DE")
-    ax.set_facecolor("#F2E8DE")
-
-    ax.fill(
-        angles,
-        scores_plot,
-        color="#FF4810",
-        alpha=0.25,
-    )
-
-    ax.plot(
-        angles,
-        scores_plot,
-        color="#FF4810",
-        linewidth=2.5,
-    )
-
-    for angle, score in zip(angles[:-1], scores):
-        ax.plot(
-            angle,
-            score,
-            "o",
-            color="#FF4810",
-            markersize=7,
-            zorder=5,
-        )
-
-    ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(
-        radar_labels,
-        size=10,
-        fontweight="bold",
-        color="#1A1A1A",
-    )
-
-    ax.set_ylim(0, MAX_DIMENSION_SCORE)
-
-    ax.set_yticks(
-        range(1, MAX_DIMENSION_SCORE + 1)
-    )
-
-    ax.set_yticklabels(
-        [
-            str(score)
-            for score in range(1, MAX_DIMENSION_SCORE + 1)
-        ],
-        size=8,
-        color="#7A6A5E",
-    )
-
-    ax.grid(
-        color="#DDD0C4",
-        linestyle="--",
-        linewidth=0.6,
-    )
-
-    ax.spines["polar"].set_color("#DDD0C4")
-
-    maximum_score = get_maximum_total_score()
-
-    plt.title(
-        f"HJPI — {system_name}\n"
-        f"{total}/{maximum_score}  "
-        f"({percentage:.1f}%)  |  {verdict}",
-        size=11,
-        fontweight="bold",
-        color="#1A1A1A",
-        pad=20,
-    )
-
-    fig.text(
-        0.5,
-        0.01,
-        "The Responsibility Lens | "
-        "Ethentra Limited | hello@ethentra.co",
-        ha="center",
-        size=8,
-        color="#7A6A5E",
-    )
-
-    return fig
-
-
-def csv_to_download(meta, scores, total, percentage, verdict):
-    row = {
-        "Date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "System Name": meta["system_name"], "Evaluator": meta["evaluator"],
-        "Organisation": meta["organisation"], "Context": meta["context"],
-        "Q1 Reasoning": scores[0], "Q2 Override": scores[1], "Q3 Skill Dev": scores[2],
-        "Q4 No Outsourcing": scores[3], "Q5 Transparency": scores[4],
-        "Total": total, "Percentage": round(percentage, 1), "Verdict": verdict
-    }
-    output = StringIO()
-    writer = csv.DictWriter(output, fieldnames=row.keys())
-    writer.writeheader()
-    writer.writerow(row)
-    return output.getvalue().encode("utf-8")
-
+# ============================================================
+# SESSION STATE
+# ============================================================
 
 if "step" not in st.session_state:
     st.session_state.step = "intro"
 
-st.markdown("""
+
+# ============================================================
+# HEADER
+# ============================================================
+
+st.markdown(
+    """
 <div class="brand-header">
     <h1>The Responsibility Lens</h1>
-    <p>Human Judgment Preservation Index · Ethentra Limited</p>
+    <p>Human Judgment Preservation Index · ETHENTRA</p>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
+
+# ============================================================
+# INTRO
+# ============================================================
 
 if st.session_state.step == "intro":
     st.markdown("### What is the HJPI Tool?")
 
-    st.markdown("""
+    st.markdown(
+        f"""
 The **Human Judgment Preservation Index (HJPI)** is a structured screening
 assessment for examining how an AI-assisted system may affect human judgment,
 agency, and meaningful oversight.
 
-It evaluates the system across **five dimensions** and identifies potential
-risks to the preservation of human judgment, highlighting areas that may
-require deeper review.
-""")
+It evaluates the system across **{len(HJPI_DIMENSIONS)} dimensions** and
+identifies potential risks to the preservation of human judgment,
+highlighting areas that may require deeper review.
+"""
+    )
+
     st.markdown("---")
-    st.markdown('<div class="section-label">The Five Dimensions</div>', unsafe_allow_html=True)
-    for icon, title, desc in [
-        ("🔍", "Reasoning Transparency", "Does the AI show its reasoning?"),
-        ("🎛️", "User Override Capability", "Can users override — and do they?"),
-        ("📈", "Skill Development", "Does use build user skills over time?"),
-        ("🧠", "No Decision Outsourcing", "Are users genuinely reviewing outputs?"),
-        ("💡", "Transparency at Use", "Do users understand what the system does?"),
-    ]:
-        st.markdown(f"**{icon} {title}** — {desc}")
+
+    st.markdown(
+        f'<div class="section-label">'
+        f'The {len(HJPI_DIMENSIONS)} Dimensions'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    for dimension in HJPI_DIMENSIONS:
+        st.markdown(
+            f"**{dimension['icon']} {dimension['name']}** — "
+            f"{dimension['description']}"
+        )
+
     st.markdown("---")
+
     if st.button("Begin Evaluation →"):
         st.session_state.step = "details"
         st.rerun()
 
 
+# ============================================================
+# SYSTEM DETAILS
+# ============================================================
+
 elif st.session_state.step == "details":
     st.markdown("### Step 1 of 2 — System Details")
-    st.markdown('<div class="section-label">Tell us about the AI system you are evaluating</div>', unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="section-label">'
+        'Tell us about the AI system you are evaluating'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
     with st.form("details_form"):
-        system_name = st.text_input("AI System / Product Name *")
-        evaluator = st.text_input("Your Name *")
-        organisation = st.text_input("Organisation *")
-        context = st.text_area("Your role and reason for this evaluation", height=80)
-        submitted = st.form_submit_button("Continue to Scoring →")
+        system_name = st.text_input(
+            "AI System / Product Name *"
+        )
+
+        evaluator = st.text_input(
+            "Your Name *"
+        )
+
+        organisation = st.text_input(
+            "Organisation *"
+        )
+
+        context = st.text_area(
+            "Your role and reason for this evaluation",
+            height=80,
+        )
+
+        submitted = st.form_submit_button(
+            "Continue to Scoring →"
+        )
+
         if submitted:
             if not system_name or not evaluator or not organisation:
-                st.error("Please complete all required fields (*).")
+                st.error(
+                    "Please complete all required fields (*)."
+                )
+
             else:
-                st.session_state.meta = {"system_name": system_name, "evaluator": evaluator, "organisation": organisation, "context": context}
+                st.session_state.meta = {
+                    "system_name": system_name,
+                    "evaluator": evaluator,
+                    "organisation": organisation,
+                    "context": context,
+                }
+
                 st.session_state.step = "scoring"
                 st.rerun()
+
+
+# ============================================================
+# SCORING
+# ============================================================
+
 elif st.session_state.step == "scoring":
     st.markdown("### Step 2 of 2 — Dimension Scoring")
 
@@ -258,38 +307,11 @@ elif st.session_state.step == "scoring":
     )
 
     st.markdown(
-        "Rate each dimension from **1 (Very Poor)** to **5 (Excellent)**."
+        "Rate each dimension from "
+        "**1 (Very Poor)** to **5 (Excellent)**."
     )
 
     st.markdown("---")
-
-    questions = [
-        (
-            "🔍 Reasoning Transparency",
-            "Does the AI system present its reasoning so users can evaluate "
-            "the logic themselves?",
-        ),
-        (
-            "🎛️ User Override Capability",
-            "Do users retain the ability to override the system — "
-            "and do they actually use it?",
-        ),
-        (
-            "📈 Skill Development",
-            "Is there evidence that regular use builds user skills "
-            "rather than causing dependency?",
-        ),
-        (
-            "🧠 No Decision Outsourcing",
-            "Are users genuinely reviewing outputs rather than "
-            "simply approving them?",
-        ),
-        (
-            "💡 Transparency at Use",
-            "Is the system behaviour transparent at point of use — "
-            "users understand what it does?",
-        ),
-    ]
 
     score_options = {
         "1 — Very Poor": 1,
@@ -302,9 +324,24 @@ elif st.session_state.step == "scoring":
     with st.form("scoring_form"):
         scores = []
 
-        for i, (dim, question) in enumerate(questions):
-            st.markdown(f"**Q{i + 1}. {dim}**")
-            st.caption(question)
+        for i, dimension in enumerate(HJPI_DIMENSIONS):
+            st.markdown(
+                f"**Q{i + 1}. "
+                f"{dimension['icon']} "
+                f"{dimension['name']}**"
+            )
+
+            st.caption(
+                dimension["screening_question"]
+            )
+
+            with st.expander(
+                "What a deeper review would examine"
+            ):
+                for indicator in dimension["indicators"]:
+                    st.markdown(
+                        f"- {indicator}"
+                    )
 
             choice = st.radio(
                 f"score_{i}",
@@ -315,17 +352,25 @@ elif st.session_state.step == "scoring":
                 key=f"q{i}",
             )
 
-            scores.append(score_options[choice])
+            scores.append(
+                score_options[choice]
+            )
 
-            if i < len(questions) - 1:
+            if i < len(HJPI_DIMENSIONS) - 1:
                 st.markdown("---")
 
-        submitted = st.form_submit_button("Generate Results →")
+        submitted = st.form_submit_button(
+            "Generate Results →"
+        )
 
         if submitted:
             st.session_state.scores = scores
             st.session_state.step = "results"
             st.rerun()
+
+# ============================================================
+# RESULTS
+# ============================================================
 
 elif st.session_state.step == "results":
     scores = st.session_state.scores
@@ -351,81 +396,205 @@ elif st.session_state.step == "results":
     st.markdown("### Evaluation Results")
 
     st.markdown(
-        f'<div class="section-label">{meta["system_name"]} · {meta["organisation"]}</div>',
+        f'<div class="section-label">'
+        f'{meta["system_name"]} · '
+        f'{meta["organisation"]}'
+        f'</div>',
         unsafe_allow_html=True,
     )
+
+    # --------------------------------------------------------
+    # Score Summary
+    # --------------------------------------------------------
+
+    score_summary_html = (
+        f'<div class="score-summary">'
+        f'<div class="score-card">'
+        f'<div class="number">{total}/{maximum_score}</div>'
+        f'<div class="label">Total Score</div>'
+        f'</div>'
+        f'<div class="score-card">'
+        f'<div class="number">{percentage:.1f}%</div>'
+        f'<div class="label">HJPI Score</div>'
+        f'</div>'
+        f'</div>'
+    )
+
     st.markdown(
-        f"""
-<div class="score-summary">
-    <div class="score-card">
-        <div class="number">{total}/{maximum_score}</div>
-        <div class="label">Total Score</div>
-    </div>
-    <div class="score-card">
-        <div class="number">{percentage:.1f}%</div>
-        <div class="label">HJPI Score</div>
-    </div>
-</div>
-""",
+        score_summary_html,
         unsafe_allow_html=True,
     )
-    st.markdown(f"""
-    <div class="verdict-box {verdict_class}">
-        <strong>FLOURISHING VERDICT</strong><br>
-        <span style="font-size:1.1rem; font-weight:600">{verdict}</span><br><br>
-        {get_verdict_message(level)}
-    </div>
-    """, unsafe_allow_html=True)
+
+    # --------------------------------------------------------
+    # Verdict
+    # --------------------------------------------------------
+
+    verdict_html = (
+        f'<div class="verdict-box {verdict_class}">'
+        f'<strong>SCREENING VERDICT</strong><br>'
+        f'<span style="font-size:1.1rem; font-weight:600">'
+        f'{verdict}'
+        f'</span>'
+        f'<br><br>'
+        f'{get_verdict_message(level)}'
+        f'</div>'
+    )
+
+    st.markdown(
+        verdict_html,
+        unsafe_allow_html=True,
+    )
+
+    # --------------------------------------------------------
+    # Dimension Breakdown
+    # --------------------------------------------------------
+
     st.markdown("---")
     st.markdown("**Dimension Breakdown**")
-    for dim, score in zip(DIMENSIONS, scores):
+
+    for dimension, score in zip(DIMENSIONS, scores):
         col1, col2, col3 = st.columns([3, 1, 1])
-        col1.markdown(f"<small>{dim}</small>", unsafe_allow_html=True)
+
+        col1.markdown(
+            f"<small>{dimension}</small>",
+            unsafe_allow_html=True,
+        )
+
         col2.markdown(
             f"<small style='color:#FF4810'>"
             f"{'█' * score}"
             f"{'░' * (MAX_DIMENSION_SCORE - score)}"
             f"</small>",
-              unsafe_allow_html=True,
-              )
+            unsafe_allow_html=True,
+        )
+
         col3.markdown(
-            f"<small><b>{score}/{MAX_DIMENSION_SCORE}</b></small>",
-              unsafe_allow_html=True,
-              )
+            f"<small>"
+            f"<b>{score}/{MAX_DIMENSION_SCORE}</b>"
+            f"</small>",
+            unsafe_allow_html=True,
+        )
+
+    # --------------------------------------------------------
+    # Radar Chart
+    # --------------------------------------------------------
+
     st.markdown("---")
     st.markdown("**HJPI Radar Chart**")
-    fig = create_radar_chart(scores, meta["system_name"], total, percentage, verdict)
+
+    fig = create_radar_chart(
+        scores,
+        meta["system_name"],
+        total,
+        percentage,
+        verdict,
+    )
+
     st.pyplot(fig)
+
+    # --------------------------------------------------------
+    # Downloads
+    # --------------------------------------------------------
+
     st.markdown("---")
     st.markdown("**Download Results**")
+
     col1, col2 = st.columns(2)
-    csv_data = csv_to_download(meta, scores, total, percentage, verdict)
-    col1.download_button(label="⬇ Download CSV", data=csv_data, file_name=f"hjpi_{meta['system_name'].replace(' ', '_')}.csv", mime="text/csv")
-    buf = BytesIO()
-    fig.savefig(buf, format="png", dpi=150, bbox_inches='tight', facecolor='#F2E8DE')
-    buf.seek(0)
-    col2.download_button(label="⬇ Download Chart", data=buf, file_name=f"hjpi_{meta['system_name'].replace(' ', '_')}.png", mime="image/png")
+
+    csv_data = create_csv_export(
+        meta,
+        scores,
+        total,
+        percentage,
+        verdict,
+    )
+
+    col1.download_button(
+        label="⬇ Download CSV",
+        data=csv_data,
+        file_name=(
+            f"hjpi_"
+            f"{meta['system_name'].replace(' ', '_')}.csv"
+        ),
+        mime="text/csv",
+    )
+
+    png_data = create_png_export(fig)
+
+    col2.download_button(
+        label="⬇ Download Chart",
+        data=png_data,
+        file_name=(
+            f"hjpi_"
+            f"{meta['system_name'].replace(' ', '_')}.png"
+        ),
+        mime="image/png",
+    )
+
+    # --------------------------------------------------------
+    # Restart Assessment
+    # --------------------------------------------------------
+
     st.markdown("---")
+
     if st.button("← Run Another Evaluation"):
-        for key in ["step", "meta", "scores"]:
+        for key in [
+            "step",
+            "meta",
+            "scores",
+        ]:
             if key in st.session_state:
                 del st.session_state[key]
+
         st.rerun()
 
 
-st.markdown("""
+# ============================================================
+# FOOTER
+# ============================================================
+
+st.markdown(
+    """
 <div class="footer">
-    Ethentra Studio  |  Ethentra Limited  
-    hello@ethentra.co |  https://ethentra.co/
+    The Responsibility Lens | ETHENTRA<br>
+    hello@ethentra.co | https://ethentra.co/
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
+
+
+# ============================================================
+# PROFESSIONAL REVIEW CTA
+# ============================================================
+
 st.markdown("---")
 
-st.markdown("""
-<div style="background:#FFF8EC; border-left:5px solid #FF4810; padding:1rem 1.5rem; border-radius:4px; margin-top:1rem;">
-    📋 <b style="color:#1A1A1A;">Want a full Responsible AI Audit for your organisation?</b><br>
-    <a href="mailto:lab@ethentra.co" style="color:#FF4810; font-weight:600;">
-        Book a call → lab@ethentra.co
-    </a>
-</div>
-""", unsafe_allow_html=True)
+review_cta_html = (
+    '<div style="'
+    'background:#FFF8EC;'
+    'border-left:5px solid #FF4810;'
+    'padding:1rem 1.5rem;'
+    'border-radius:4px;'
+    'margin-top:1rem;'
+    '">'
+    '<b style="color:#1A1A1A;">'
+    '📋 Need a deeper Human Judgment Risk Review?'
+    '</b>'
+    '<br><br>'
+    '<span style="color:#7A6A5E;">'
+    'Explore a professional assessment of your AI system, '
+    'evidence, human-judgment risks, and areas requiring deeper review.'
+    '</span>'
+    '<br><br>'
+    '<a href="mailto:lab@ethentra.com" '
+    'style="color:#FF4810; font-weight:600;">'
+    'Contact ETHENTRA → lab@ethentra.co'
+    '</a>'
+    '</div>'
+)
+
+st.markdown(
+    review_cta_html,
+    unsafe_allow_html=True,
+)
